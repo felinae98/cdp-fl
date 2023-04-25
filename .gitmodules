@@ -1,0 +1,6 @@
+[submodule "fhe/Cingulata"]
+	path = fhe/Cingulata
+	url = https://github.com/CEA-LIST/Cingulata.git
+[submodule "fhe/tfhe"]
+	path = fhe/tfhe
+	url = https://github.com/tfhe/tfhe.git
