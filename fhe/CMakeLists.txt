@@ -23,3 +23,12 @@ add_subdirectory(thtfhe)
 include_directories("${CMAKE_SOURCE_DIR}/thtfhe/include")
 add_executable(test-vanilla-dec src/test_vanilla_dec.cpp)
 target_link_libraries(test-vanilla-dec ${TFHE_LIBRARIES} thfhe cblas)
+
+add_executable(off-chain src/off_chain.cpp)
+target_link_libraries(off-chain cdp-fl-utils common tfhe_bit_exec)
+
+add_executable(on-chain src/on_chain.cpp)
+target_link_libraries(on-chain cdp-fl-utils common tfhe_bit_exec)
+
+add_executable(final src/final_dec.cpp)
+target_link_libraries(final cdp-fl-utils common tfhe_bit_exec thfhe cblas)

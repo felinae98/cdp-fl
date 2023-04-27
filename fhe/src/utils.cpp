@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace cingulata;
-int scalar_mul(CiInt &res, CiInt one, CiInt zero, int32_t multiplier, int size=8) {
+int scalar_mul(CiInt &res, CiInt one, CiInt zero, int32_t multiplier, int size) {
     res = CiInt(zero);
     res = res.resize(size);
     CiInt tmp = CiInt(one.cast(size));
