@@ -12,6 +12,7 @@ target_link_libraries(init-one-zero common tfhe_bit_exec)
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 add_library(cdp-fl-utils src/utils.cpp)
+target_link_libraries(cdp-fl-utils common tfhe_bit_exec)
 
 add_executable(test-dec-enc src/test_enc_dec.cpp)
 target_link_libraries(test-dec-enc common tfhe_bit_exec cdp-fl-utils)

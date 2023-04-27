@@ -90,26 +90,26 @@ int main(){
     int result_msg, direct_result_msg, dbit, tbit;
     std::vector<int> subset{1,2,4};
     while(bound > 1e-5){
-	    result_msg = 0;
-      direct_result_msg = 0;
-	    //Assuming k = 1, n = N = 1024, and converting lwe ciphertext of each of the result bit into corresponding ring-lwe ciphertext one by one and decrypting
-		for (int i = 0; i < 32; i++){
-			resultOfEvalT = new_TLweSample(tlwe_params);
-			TLweFromLwe(resultOfEvalT, &resultOfEval[i], tlwe_params);
-			result_plaintext = new_TorusPolynomial(tlwe_params->N);    //result message polynomial after threshold decryption
-      direct_result_plaintext = new_TorusPolynomial(tlwe_params->N);    //result message polynomial after direct decryption(for comparison)
-      /* Direct decryption of Torus ring-LWE ciphertext*/
-      tLwePhase(direct_result_plaintext, resultOfEvalT, tlwe_key);
-      dbit = (direct_result_plaintext->coefsT[0] > 0) ? 1 : 0;
-      direct_result_msg += dbit << i;
-      /* Threshold decryption of Torus ring-LWE ciphertext*/
-			thresholdDecrypt(result_plaintext, resultOfEvalT, tlwe_params, subset, 3, 5, bound);
-      tbit = result_plaintext->coefsT[0] > 0 ? 1 : 0;
-			result_msg += tbit << i;
-		}
-		std::cout << "\nstandard deviation of Gaussian smudging noise: " << bound << "\n";
-    std::cout <<"result after threshold decryption: " << result_msg << "\n";
-   std::cout << "result after direct decryption: " << direct_result_msg << "\n";
-		bound /= 2;
-	}
+        result_msg = 0;
+        direct_result_msg = 0;
+        //Assuming k = 1, n = N = 1024, and converting lwe ciphertext of each of the result bit into corresponding ring-lwe ciphertext one by one and decrypting
+        for (int i = 0; i < 32; i++){
+            resultOfEvalT = new_TLweSample(tlwe_params);
+            TLweFromLwe(resultOfEvalT, &resultOfEval[i], tlwe_params);
+            result_plaintext = new_TorusPolynomial(tlwe_params->N);    //result message polynomial after threshold decryption
+            direct_result_plaintext = new_TorusPolynomial(tlwe_params->N);    //result message polynomial after direct decryption(for comparison)
+            /* Direct decryption of Torus ring-LWE ciphertext*/
+            tLwePhase(direct_result_plaintext, resultOfEvalT, tlwe_key);
+            dbit = (direct_result_plaintext->coefsT[0] > 0) ? 1 : 0;
+            direct_result_msg += dbit << i;
+            /* Threshold decryption of Torus ring-LWE ciphertext*/
+            thresholdDecrypt(result_plaintext, resultOfEvalT, tlwe_params, subset, 3, 5, bound);
+            tbit = result_plaintext->coefsT[0] > 0 ? 1 : 0;
+            result_msg += tbit << i;
+        }
+        std::cout << "\nstandard deviation of Gaussian smudging noise: " << bound << "\n";
+        std::cout <<"result after threshold decryption: " << result_msg << "\n";
+        std::cout << "result after direct decryption: " << direct_result_msg << "\n";
+        bound /= 2;
+    }
 }

@@ -33,30 +33,32 @@ int main() {
         fclose(file);
     }
 
-    TorusPolynomial *partdec[3];
+    TorusPolynomial *partdec[8][3];
     auto thtfhe = new ThFHE();
     thtfhe->SplitKey(m_sk, 3, 3);
     
-    TLweParams *tlwe_params = new_TLweParams(1024, 1, 3e-8, 0.2);
-    auto tlwe_ciphertext = new_TLweSample(tlwe_params);
-    TLweFromLwe(tlwe_ciphertext, ciphertext, tlwe_params);
-    partdec[0] = new_TorusPolynomial(tlwe_params->N);
-    partdec[1] = new_TorusPolynomial(tlwe_params->N);
-    partdec[2] = new_TorusPolynomial(tlwe_params->N);
-    std::vector<int> parties{1,2,3};
+    for (int i = 0; i < 8; i++) {
+        TLweParams *tlwe_params = new_TLweParams(1024, 1, 3e-8, 0.2);
+        auto tlwe_ciphertext = new_TLweSample(tlwe_params);
+        TLweFromLwe(tlwe_ciphertext, &ciphertext[i], tlwe_params);
+        partdec[i][0] = new_TorusPolynomial(tlwe_params->N);
+        partdec[i][1] = new_TorusPolynomial(tlwe_params->N);
+        partdec[i][2] = new_TorusPolynomial(tlwe_params->N);
+        std::vector<int> parties{1,2,3};
 
-    auto keyshare1 = new ThFHEKeyShare();
-    thtfhe->GetShareSet(1, keyshare1);
-    keyshare1->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[0], parties, 3, 3, 0.0125);
+        auto keyshare1 = new ThFHEKeyShare();
+        thtfhe->GetShareSet(1, keyshare1);
+        keyshare1->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[i][0], parties, 3, 3, 0.0125);
 
-    auto keyshare2 = new ThFHEKeyShare();
-    thtfhe->GetShareSet(2, keyshare2);
-    keyshare2->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[1], parties, 3, 3, 0.0125);
-    
-    auto keyshare3 = new ThFHEKeyShare();
-    thtfhe->GetShareSet(3, keyshare3);
-    keyshare3->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[2], parties, 3, 3, 0.0125);
+        auto keyshare2 = new ThFHEKeyShare();
+        thtfhe->GetShareSet(2, keyshare2);
+        keyshare2->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[i][1], parties, 3, 3, 0.0125);
+        
+        auto keyshare3 = new ThFHEKeyShare();
+        thtfhe->GetShareSet(3, keyshare3);
+        keyshare3->PartialDecrypt(tlwe_ciphertext, tlwe_params, partdec[i][2], parties, 3, 3, 0.0125);
 
-    auto res = finalDecrypt(tlwe_ciphertext, partdec, tlwe_params, parties, 3, 3);
-    std::cout << res << std::endl;
+        auto res = finalDecrypt(tlwe_ciphertext, partdec[i], tlwe_params, parties, 3, 3);
+        std::cout << res << std::endl;
+    }
 }
