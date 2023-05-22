@@ -46,7 +46,7 @@ void map_to_laplace(CiInt &res, CiInt input, CiInt one, CiInt zero) {
         // add_temp = coef * tmp;
         scalar_mul(add_temp, tmp,  zero, coefs[i-1], 32);
         res += add_temp;
-        std::cout << "i: " << i <<" tmp: " << tmp.decrypt().get_val() << " to_add: " << add_temp.decrypt().get_val() << " res: " << res.decrypt().get_val() << std::endl;
+        // std::cout << "i: " << i <<" tmp: " << tmp.decrypt().get_val() << " to_add: " << add_temp.decrypt().get_val() << " res: " << res.decrypt().get_val() << std::endl;
     }
     res = select(is_positive, res, -res);
 }
