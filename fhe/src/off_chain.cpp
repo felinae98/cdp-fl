@@ -38,4 +38,5 @@ int main(int argc, char* argv[]) {
 
     rand_ci.write(rand_name);
     grad_ci.write(grad_name);
+    CiContext::get_bit_exec_t<decorator::Stat<IBitExecFHE>>()->print();
 }

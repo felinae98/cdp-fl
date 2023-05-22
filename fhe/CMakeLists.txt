@@ -32,3 +32,7 @@ target_link_libraries(on-chain cdp-fl-utils common tfhe_bit_exec)
 
 add_executable(final src/final_dec.cpp)
 target_link_libraries(final cdp-fl-utils common tfhe_bit_exec thfhe cblas)
+
+configure_file(test.py.in test.py)
+configure_file(test_onchain.py.in test_onchain.py)
+configure_file(batch_test.py.in batch_test.py)

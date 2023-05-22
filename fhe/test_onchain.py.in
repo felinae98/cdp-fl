@@ -1,0 +1,69 @@
+import re
+import subprocess
+from argparse import ArgumentParser
+import time
+import random
+from statistics import mean
+
+parser = ArgumentParser()
+parser.add_argument('-n', type=int)
+parser.add_argument('-r', type=int, default=10)
+args = parser.parse_args()
+
+off_chain_time = []
+off_chain_gates = []
+
+on_chain_gates = []
+on_chain_time = []
+
+dec_time = []
+random_set = []
+
+for j in range(args.r):
+    user_num = 10
+    user_grads = [random.randrange(-2**30, 2**30) for _ in range(user_num-1)]
+    user_grads.append(1-sum(user_grads))
+    for i in range(user_num):
+        random_num = random.randrange(0, 256) 
+        begin_time = time.time()
+        res = subprocess.run(["./off-chain", f'b-{i}', str(user_grads[i]), str(random_num)], capture_output=True)
+        output = res.stdout.decode()
+        re_res = re.search(r'=\s+(\d+)', output)
+        gates = int(re_res.group(1))
+        off_chain_gates.append(gates)
+        end_time = time.time()
+        used_time = end_time - begin_time
+        off_chain_time.append(used_time)
+        print(f"offchain for user-{i}: {used_time}")
+
+    usernames = list(map(lambda x: f'b-{x % 10}', range(args.n-1)))
+    usernames.append(usernames[-1])
+    begin_time = time.time()
+    res = subprocess.run(["./on-chain", str(args.n), *usernames], capture_output=True)
+    output = res.stdout.decode()
+    re_res = re.search(r'=\s+(\d+)', output)
+    gates = int(re_res.group(1))
+    end_time = time.time()
+    used_time = end_time - begin_time
+    on_chain_gates.append(gates)
+    on_chain_time.append(used_time)
+    print(f"onchain: {used_time}")
+
+    begin_time = time.time()
+    res = subprocess.run(["./final"], capture_output=True)
+    end_time = time.time()
+    used_time = end_time - begin_time
+    dec_time.append(used_time)
+    print(f"decrypt: {end_time - begin_time}")
+
+    final_res = int(res.stdout.decode().strip())
+    expect_res = sum(user_grads) / user_num
+    cur_res = final_res / user_num
+
+    print(f"origin res: {expect_res}, generated res: {cur_res}")
+
+print(f"offchain gate {mean(off_chain_gates)}, offchain time {mean(off_chain_time)}")
+print(f"onchain gate {mean( on_chain_gates )}, onchain time {mean(on_chain_time)}")
+print(f"dec time {mean(dec_time)}")
+
+# vim: ft=python:

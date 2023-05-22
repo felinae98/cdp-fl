@@ -39,13 +39,14 @@ void map_to_laplace(CiInt &res, CiInt input, CiInt one, CiInt zero) {
     gen_laplace_coes(coefs);
     for (int i = 1; i <= laplace_order; i++) {
         tmp *= abs_input;
-        CiInt coef{CiInt::u32};
+        // CiInt coef{CiInt::u32};
         std::cout << coefs[i-1] << std::endl;
-        scalar_mul(coef, one, zero, coefs[i-1], 32);
+        // scalar_mul(coef, one, zero, coefs[i-1], 32);
         auto add_temp = CiInt{CiInt::u32};
-        add_temp = coef * tmp;
+        // add_temp = coef * tmp;
+        scalar_mul(add_temp, tmp,  zero, coefs[i-1], 32);
         res += add_temp;
-        std::cout << "i: " << i <<" tmp: " << tmp.decrypt().get_val() << " coef: " << coef.decrypt().get_val() << " to_add: " << add_temp.decrypt().get_val() << " res: " << res.decrypt().get_val() << std::endl;
+        std::cout << "i: " << i <<" tmp: " << tmp.decrypt().get_val() << " to_add: " << add_temp.decrypt().get_val() << " res: " << res.decrypt().get_val() << std::endl;
     }
     res = select(is_positive, res, -res);
 }

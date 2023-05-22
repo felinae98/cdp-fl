@@ -56,4 +56,5 @@ int main(int argc, char* argv[]) {
     grad_sum += mapped_rand;
     std::cout << "frand: " << int32_t(mapped_rand.decrypt().get_val()) << " final: " << int32_t(grad_sum.decrypt().get_val()) << std::endl;
     grad_sum.write("final");
+    CiContext::get_bit_exec_t<decorator::Stat<IBitExecFHE>>()->print();
 }

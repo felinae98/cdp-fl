@@ -1,0 +1,39 @@
+import subprocess
+from argparse import ArgumentParser
+import timeit
+import time
+import random
+
+parser = ArgumentParser()
+parser.add_argument('-g', nargs='+', type=int)
+parser.add_argument('-n', type=int)
+args = parser.parse_args()
+
+if args.n:
+    user_num = args.n
+    user_grads = [random.randrange(-2**30, 2**30) for _ in range(user_num)]
+else:
+    user_grads: list[int] = args.g
+    user_num = len(user_grads)
+
+for i in range(user_num):
+    random_num = random.randrange(0, 256) 
+    used_time = timeit.timeit(lambda: subprocess.run(["./off-chain", str(i), str(user_grads[i]), str(random_num)]), number=1)
+    print(f"offchain for user-{i}: {used_time}")
+
+usernames = list(map(str, range(user_num)))
+used_time = timeit.timeit(lambda: subprocess.run(["./on-chain", str(user_num), *usernames]), number=1)
+print(f"onchain: {used_time}")
+
+begin_time = time.time()
+res = subprocess.run(["./final"], capture_output=True)
+end_time = time.time()
+print(f"decrypt: {end_time - begin_time}")
+
+final_res = int(res.stdout.decode().strip())
+expect_res = sum(user_grads) / user_num
+cur_res = final_res / user_num
+
+print(f"origin res: {expect_res}, generated res: {cur_res}")
+
+# vim: ft=python:

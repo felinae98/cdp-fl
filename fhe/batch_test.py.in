@@ -1,0 +1,75 @@
+import re
+import subprocess
+from argparse import ArgumentParser
+import time
+import random
+from statistics import mean
+
+parser = ArgumentParser()
+parser.add_argument('-n', type=int)
+parser.add_argument('-r', type=int, default=10)
+parser.add_argument('-s', action='store_true')
+parser.add_argument('--dry-onchain', action='store_true')
+args = parser.parse_args()
+
+off_chain_time = []
+off_chain_gates = []
+
+on_chain_gates = []
+on_chain_time = []
+
+dec_time = []
+random_set = []
+
+for j in range(1000 if args.s else args.r):
+    user_num = 1 if args.s or args.dry_onchain else args.n
+    user_grads = [0] if args.s else [random.randrange(-2**30, 2**30) for _ in range(user_num)]
+    for i in range(user_num):
+        random_num = random.randrange(0, 256) 
+        begin_time = time.time()
+        res = subprocess.run(["./off-chain", str(i), str(user_grads[i]), str(random_num)], capture_output=True)
+        output = res.stdout.decode()
+        re_res = re.search(r'=\s+(\d+)', output)
+        gates = int(re_res.group(1))
+        off_chain_gates.append(gates)
+        end_time = time.time()
+        used_time = end_time - begin_time
+        off_chain_time.append(used_time)
+        print(f"offchain for user-{i}: {used_time}")
+
+    usernames = list(map(str, range(user_num)))
+    if args.dry_onchain:
+        usernames = ['0'] * args.n
+    begin_time = time.time()
+    res = subprocess.run(["./on-chain", str(args.n if args.dry_onchain else user_num), *usernames], capture_output=True)
+    output = res.stdout.decode()
+    re_res = re.search(r'=\s+(\d+)', output)
+    gates = int(re_res.group(1))
+    end_time = time.time()
+    used_time = end_time - begin_time
+    on_chain_gates.append(gates)
+    on_chain_time.append(used_time)
+    print(f"onchain: {used_time}")
+
+    begin_time = time.time()
+    res = subprocess.run(["./final"], capture_output=True)
+    end_time = time.time()
+    used_time = end_time - begin_time
+    dec_time.append(used_time)
+    print(f"decrypt: {end_time - begin_time}")
+
+    final_res = int(res.stdout.decode().strip())
+    if args.s:
+        random_set.append(final_res)
+    expect_res = sum(user_grads) / user_num
+    cur_res = final_res / user_num
+
+    print(f"origin res: {expect_res}, generated res: {cur_res}")
+
+if args.s:
+    print(random_set)
+print(f"offchain gate {mean(off_chain_gates)}, offchain time {mean(off_chain_time)}")
+print(f"onchain gate {mean( on_chain_gates )}, onchain time {mean(on_chain_time)}")
+print(f"dec time {mean(dec_time)}")
+
+# vim: ft=python:
